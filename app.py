@@ -19,7 +19,7 @@ st.markdown("""
         font-family: 'Lacquer', sans-serif !important;
         letter-spacing: 1px;
         text-align: center;
-        color: #eb5e28 !important;
+        color: #3c6e71 !important;
     }
 
     /* Apply Cutive Mono to standard body text and inputs */
@@ -29,15 +29,15 @@ st.markdown("""
 
     /* Style recipe expander cards with Dust Grey borders */
     [data-testid="stExpander"] {
-        border: 1px solid #ccc5b9 !important;
+        border: 1px solid #d9d9d9 !important;
         border-radius: 8px !important;
-        background-color: #403d39 !important;
+        background-color: #284b63 !important;
         margin-bottom: 0.75rem;
     }
 
     /* Keep the expander header readable and cleanly spaced */
     [data-testid="stExpander"] summary {
-        color: #eb5e28 !important;
+        color: #3c6e71 !important;
         font-weight: bold !important;
     }
 
@@ -48,9 +48,9 @@ st.markdown("""
 
     /* Style tag pills with spicy paprika border and accent tone */
     code {
-        color: #eb5e28 !important;
-        background-color: #252422 !important;
-        border: 1px solid #eb5e28 !important;
+        color: #3c6e71 !important;
+        background-color: #353535 !important;
+        border: 1px solid #3c6e71 !important;
         border-radius: 12px !important;
         padding: 0.15rem 0.5rem !important;
         font-family: inherit !important;
@@ -59,8 +59,8 @@ st.markdown("""
 
     /* Style primary form buttons with spicy paprika */
     div[data-testid="stFormSubmitButton"] > button {
-        background-color: #eb5e28 !important;
-        color: #fffcf2 !important;
+        background-color: #3c6e71 !important;
+        color: #ffffff !important;
         border: none !important;
         border-radius: 6px !important;
         font-family: 'Cutive Mono', monospace !important;
@@ -69,8 +69,8 @@ st.markdown("""
     }
 
     div[data-testid="stFormSubmitButton"] > button:hover {
-        background-color: #d44d1b !important;
-        color: #fffcf2 !important;
+        background-color: #395253 !important;
+        color: #ffffff !important;
     }
     </style>
     """, unsafe_allow_html=True
