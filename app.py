@@ -37,7 +37,7 @@ st.markdown("""
 
     /* Keep the expander header readable and cleanly spaced */
     [data-testid="stExpander"] summary {
-        color: #3c6e71 !important;
+        color: #d9d9d9 !important;
         font-weight: bold !important;
     }
 
@@ -49,7 +49,7 @@ st.markdown("""
     /* Style tag pills with spicy paprika border and accent tone */
     code {
         color: #3c6e71 !important;
-        background-color: #353535 !important;
+        background-color: #333333 !important;
         border: 1px solid #3c6e71 !important;
         border-radius: 12px !important;
         padding: 0.15rem 0.5rem !important;
