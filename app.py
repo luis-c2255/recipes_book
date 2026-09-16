@@ -14,12 +14,19 @@ st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Lacquer&family=Cutive+Mono&display=swap');
 
+    /* Palette
+       --ink    #0D1321  deep navy   (dark surfaces)
+       --teal   #008B8B  accent      (headings, buttons, pills)
+       --mist   #D9D9D9  light grey  (borders, muted text)
+       --paper  #F2F3F4  off-white   (text on dark surfaces)
+    */
+
     /* Apply Lacquer to titles, headers, and subheaders */
     h1, h2, h3, h4, h5, h6, [data-testid="stHeader"] {
         font-family: 'Lacquer', sans-serif !important;
         letter-spacing: 1px;
         text-align: center;
-        color: #3c6e71 !important;
+        color: #008B8B !important;
     }
 
     /* Apply Cutive Mono to standard body text and inputs */
@@ -27,17 +34,25 @@ st.markdown("""
         font-family: 'Cutive Mono', monospace !important;
     }
 
-    /* Style recipe expander cards with Dust Grey borders */
+    /* Style recipe expander cards in deep navy with a light grey border */
     [data-testid="stExpander"] {
-        border: 1px solid #d9d9d9 !important;
+        border: 1px solid #D9D9D9 !important;
         border-radius: 8px !important;
-        background-color: #284b63 !important;
+        background-color: #0D1321 !important;
         margin-bottom: 0.75rem;
+    }
+
+    /* Card text sits on a dark surface, so keep it off-white */
+    [data-testid="stExpander"] p,
+    [data-testid="stExpander"] span,
+    [data-testid="stExpander"] li,
+    [data-testid="stExpander"] [data-testid="stMarkdown"] {
+        color: #F2F3F4 !important;
     }
 
     /* Keep the expander header readable and cleanly spaced */
     [data-testid="stExpander"] summary {
-        color: #d9d9d9 !important;
+        color: #008B8B !important;
         font-weight: bold !important;
     }
 
@@ -46,31 +61,33 @@ st.markdown("""
         font-family: 'Material Symbols Rounded', 'Material Icons', sans-serif !important;
     }
 
-    /* Style tag pills with spicy paprika border and accent tone */
+    /* Style tag pills as solid teal chips */
     code {
-        color: #3c6e71 !important;
-        background-color: #333333 !important;
-        border: 1px solid #3c6e71 !important;
+        color: #F2F3F4 !important;
+        background-color: #008B8B !important;
+        border: 1px solid #008B8B !important;
         border-radius: 12px !important;
         padding: 0.15rem 0.5rem !important;
         font-family: inherit !important;
         font-weight: bold !important;
     }
 
-    /* Style primary form buttons with spicy paprika */
+    /* Style primary form buttons in teal */
     div[data-testid="stFormSubmitButton"] > button {
-        background-color: #3c6e71 !important;
-        color: #ffffff !important;
-        border: none !important;
+        background-color: #008B8B !important;
+        color: #F2F3F4 !important;
+        border: 1px solid #008B8B !important;
         border-radius: 6px !important;
         font-family: 'Cutive Mono', monospace !important;
         letter-spacing: 1px !important;
         transition: 0.2s ease-in-out;
     }
 
+    /* Hover inverts to navy so the state reads without a fifth colour */
     div[data-testid="stFormSubmitButton"] > button:hover {
-        background-color: #395253 !important;
-        color: #ffffff !important;
+        background-color: #0D1321 !important;
+        color: #F2F3F4 !important;
+        border: 1px solid #008B8B !important;
     }
     </style>
     """, unsafe_allow_html=True
@@ -225,7 +242,7 @@ else:
                         st.caption("⚠️ No se puede cargar la imagen desde la URL proporcionada. Por favor, verifica la URL o intenta con una diferente.")
                     else:
                         try:
-                            st.image(image_bytes, width="stretch")
+                            st.image(image_bytes, use_container_width=True)
                         except Exception:
                             st.caption("⚠️ El archivo de la URL no es una imagen válida.")
 
