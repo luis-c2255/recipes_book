@@ -89,6 +89,22 @@ st.markdown("""
         color: #F2F3F4 !important;
         border: 1px solid #008B8B !important;
     }
+
+    button[kind="primary"] {
+        background-color: #008B8B !important;
+        color: #F2F3F4 !important;
+        border: 1px solid #008B8B !important;
+        font-family: 'Cutive Mono', monospace !important;
+        letter-spacing: 1px !important;
+        transition: 0.2s ease-in-out;
+    }
+
+    button[kind="primary"]:hover {
+        background-color: #0D1321 !important;
+        color: #F2F3F4 !important;
+        border: 1px solid #008B8B !important;
+    }        
+        
     </style>
     """, unsafe_allow_html=True
 )
