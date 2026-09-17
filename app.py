@@ -90,6 +90,8 @@ st.markdown("""
         border: 1px solid #008B8B !important;
     }
 
+    /* "Sí, Eliminar" confirm button — overrides Streamlit's default red
+       for type="primary" buttons that live outside a form */
     button[kind="primary"] {
         background-color: #008B8B !important;
         color: #F2F3F4 !important;
@@ -103,13 +105,30 @@ st.markdown("""
         background-color: #0D1321 !important;
         color: #F2F3F4 !important;
         border: 1px solid #008B8B !important;
-    }        
-        
+    }
     </style>
     """, unsafe_allow_html=True
 )
 
 st.title("Mis Recetas")
+
+def format_as_bullets(text: str, split_on_commas: bool = False) -> str:
+    """Turn a raw ingredients/instructions string into a markdown bullet list.
+
+    Recipes are typed into a text_area, so multiple lines usually already
+    mean "one item per line". If it comes in as a single line (e.g. a
+    comma-separated ingredient list), split_on_commas lets us break it up too.
+    """
+    if not text or not text.strip():
+        return ""
+
+    lines = [line.strip() for line in text.strip().split("\n") if line.strip()]
+
+    if len(lines) <= 1 and split_on_commas:
+        lines = [item.strip() for item in text.split(",") if item.strip()]
+
+    return "\n".join(f"- {line}" for line in lines)
+
 
 # Ensure the database is initialized
 init_db()
@@ -275,8 +294,10 @@ else:
                 tag_badges = " ".join([f"`#{t}`" for t in tag_list])
                 st.markdown(f"🏷️ **Tags:** {tag_badges}")
 
-            st.markdown(f"**Ingredientes:** \n{ingredients}")
-            st.markdown(f"**Instrucciones:** \n{instructions}")
+            st.markdown("**Ingredientes:**")
+            st.markdown(format_as_bullets(ingredients, split_on_commas=True))
+            st.markdown("**Instrucciones:**")
+            st.markdown(format_as_bullets(instructions))
 
             btn_col1, btn_col2 = st.columns([1, 1])
             with btn_col1:
@@ -334,3 +355,4 @@ with st.sidebar.form("new_recipe_form", clear_on_submit=True):
             st.rerun()
         else:
             st.sidebar.error("Por favor, completa el título, los ingredientes y las instrucciones antes de enviar.")
+            st.rerun()
