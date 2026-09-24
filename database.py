@@ -1,8 +1,12 @@
 import sqlite3
 
+# Define the database filename as a constant
+
+DB_NAME = 'recipes.db'
+
 def init_db():
     # Create a connection to the SQLite database
-    conn = sqlite3.connect('recipes.db')
+    conn = sqlite3.connect('DB_NAME')
     cursor = conn.cursor()
 
     # Create the recipes table if it doesn't exist
@@ -14,21 +18,16 @@ def init_db():
             ingredients TEXT NOT NULL,
             instructions TEXT NOT NULL,
             prep_time TEXT,
-            cook_time TEXT
+            cook_time TEXT,
+            image_url TEXT,
+            tags TEXT
             )
             ''')
-    # Safely add columns if this table was created in an earlier step
-    for column in ['prep_time', 'cook_time', "image_url", "tags"]:
-        try:
-            cursor.execute(f"ALTER TABLE recipes ADD COLUMN {column} TEXT")
-        except sqlite3.OperationalError:
-            # Column already exists, ignore the error
-            pass
     conn.commit()
     conn.close()
 
 def add_recipe(title, category, ingredients, instructions, prep_time="", cook_time="", image_url="", tags=""):
-    conn = sqlite3.connect('recipes.db')
+    conn = sqlite3.connect('DB_NAME')
     cursor = conn.cursor()
 
     cursor.execute('''
@@ -40,7 +39,7 @@ def add_recipe(title, category, ingredients, instructions, prep_time="", cook_ti
     conn.close()
 
 def get_recipes():
-    conn = sqlite3.connect('recipes.db')
+    conn = sqlite3.connect('DB_NAME')
     cursor = conn.cursor()
 
     cursor.execute('SELECT id, title, category, ingredients, instructions, prep_time, cook_time, image_url, tags FROM recipes')
@@ -50,14 +49,14 @@ def get_recipes():
     return rows
 
 def delete_recipe(recipe_id):
-    conn = sqlite3.connect("recipes.db")
+    conn = sqlite3.connect("DB_NAME")
     cursor = conn.cursor()
     cursor.execute("DELETE FROM recipes WHERE id = ?", (recipe_id,))
     conn.commit()
     conn.close()
 
 def update_recipe(recipe_id, title, category, ingredients, instructions, prep_time="", cook_time="", image_url="", tags=""):
-    conn = sqlite3.connect("recipes.db")
+    conn = sqlite3.connect("DB_NAME")
     cursor = conn.cursor()
     cursor.execute('''
         UPDATE recipes
@@ -69,12 +68,4 @@ def update_recipe(recipe_id, title, category, ingredients, instructions, prep_ti
 
 if __name__ == '__main__':
     init_db()
-    # Add a sample recipe for testing purposes
-    add_recipe(
-        "Tomato Pasta",
-        "Pasta",
-        "Pasta, Tomato Sauce, Garlic, Olive oil",
-        "Boil pasta. In a separate pan, sauté garlic in olive oil, add tomato sauce, and simmer. Combine with cooked pasta."
-    )
-    saved_recipes = get_recipes()
-    print("Recipes in the database:", saved_recipes)
+    print("Database initialized successfully!")
