@@ -1,16 +1,39 @@
 import os
-import sqlite3
 
-# Anchor the database file to this script's own folder, not to whatever
-# directory the app happens to be launched from. Without this, running
-# `streamlit run script.py` from a different terminal/working directory
-# silently creates a brand-new, empty recipes.db elsewhere on disk --
-# which looks exactly like "all my recipes disappeared".
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "recipes.db")
+import libsql
+import streamlit as st
+
+
+def _get_credentials():
+    """Read Turso connection details from Streamlit secrets.
+
+    Locally these come from .streamlit/secrets.toml; on Streamlit Community
+    Cloud they come from the app's Settings -> Secrets. Falling back to
+    environment variables lets `python database.py` still work standalone.
+    """
+    url = None
+    token = None
+    try:
+        url = st.secrets["TURSO_DATABASE_URL"]
+        token = st.secrets["TURSO_AUTH_TOKEN"]
+    except Exception:
+        pass
+
+    url = url or os.environ.get("TURSO_DATABASE_URL")
+    token = token or os.environ.get("TURSO_AUTH_TOKEN")
+
+    if not url or not token:
+        raise RuntimeError(
+            "Missing Turso credentials. Set TURSO_DATABASE_URL and "
+            "TURSO_AUTH_TOKEN in .streamlit/secrets.toml (or as environment "
+            "variables), then try again."
+        )
+    return url, token
 
 
 def get_connection():
-    return sqlite3.connect(DB_PATH)
+    url, token = _get_credentials()
+    return libsql.connect(database=url, auth_token=token)
 
 
 def init_db():
@@ -33,7 +56,7 @@ def init_db():
     for column in ['prep_time', 'cook_time', "image_url", "tags"]:
         try:
             cursor.execute(f"ALTER TABLE recipes ADD COLUMN {column} TEXT")
-        except sqlite3.OperationalError:
+        except Exception:
             # Column already exists, ignore the error
             pass
     conn.commit()

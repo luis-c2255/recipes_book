@@ -1,3 +1,5 @@
+import csv
+import io
 from urllib.parse import urlparse
 
 import requests
@@ -9,6 +11,13 @@ from database import init_db, get_recipes, add_recipe, delete_recipe, update_rec
 st.set_page_config(page_title="Mis Recetas", layout="wide")
 
 CATEGORIES = ["Platos principales", "Pasta", "Postres", "Ensaladas", "Sopas", "Otro"]
+
+# Columns expected in a bulk-import CSV, in order. Only title, ingredients
+# and instructions are required; the rest can be left blank.
+CSV_COLUMNS = [
+    "title", "category", "ingredients", "instructions",
+    "prep_time", "cook_time", "image_url", "tags",
+]
 
 st.markdown("""
 <style>
@@ -277,7 +286,7 @@ else:
                         st.caption("⚠️ No se puede cargar la imagen desde la URL proporcionada. Por favor, verifica la URL o intenta con una diferente.")
                     else:
                         try:
-                            st.image(image_bytes, width="Stretch")
+                            st.image(image_bytes, use_container_width=True)
                         except Exception:
                             st.caption("⚠️ El archivo de la URL no es una imagen válida.")
 
@@ -355,4 +364,92 @@ with st.sidebar.form("new_recipe_form", clear_on_submit=True):
             st.rerun()
         else:
             st.sidebar.error("Por favor, completa el título, los ingredientes y las instrucciones antes de enviar.")
-            st.rerun()
+
+st.sidebar.divider()
+st.sidebar.header("📥 Importar varias recetas (CSV)")
+
+with st.sidebar.expander("Cómo funciona"):
+    st.markdown(
+        "1. Descarga la plantilla.\n"
+        "2. Rellena una fila por receta (puedes usar Excel, Google Sheets o "
+        "un editor de texto) y guarda como CSV.\n"
+        "3. Súbelo aquí abajo y confirma la importación.\n\n"
+        "Solo **title**, **ingredients** e **instructions** son obligatorios. "
+        "Si **category** no coincide con una categoría existente, la receta "
+        "se guardará como 'Otro'."
+    )
+
+    template_buffer = io.StringIO()
+    template_writer = csv.writer(template_buffer)
+    template_writer.writerow(CSV_COLUMNS)
+    template_writer.writerow([
+        "Tortilla de Patatas", "Platos principales",
+        "6 huevos\n4 patatas medianas\n1 cebolla\nAceite de oliva\nSal",
+        "Pela y corta las patatas.\nFríelas a fuego lento.\nBate los huevos y mezcla.\nCuaja la tortilla por ambos lados.",
+        "20 mins", "25 mins", "", "español, clásico",
+    ])
+    st.download_button(
+        "⬇️ Descargar plantilla CSV",
+        data=template_buffer.getvalue().encode("utf-8-sig"),
+        file_name="plantilla_recetas.csv",
+        mime="text/csv",
+    )
+
+uploaded_csv = st.sidebar.file_uploader(
+    "Sube tu CSV de recetas", type=["csv"], key="bulk_recipe_csv"
+)
+
+if uploaded_csv is not None:
+    try:
+        text = uploaded_csv.getvalue().decode("utf-8-sig")
+        reader = csv.DictReader(io.StringIO(text))
+        missing_columns = [c for c in ("title", "ingredients", "instructions") if c not in (reader.fieldnames or [])]
+
+        if missing_columns:
+            st.sidebar.error(
+                "Al CSV le faltan columnas obligatorias: " + ", ".join(missing_columns)
+            )
+        else:
+            valid_rows = []
+            skipped = 0
+            for row in reader:
+                title = (row.get("title") or "").strip()
+                ingredients = (row.get("ingredients") or "").strip()
+                instructions = (row.get("instructions") or "").strip()
+                if not (title and ingredients and instructions):
+                    skipped += 1
+                    continue
+                category = (row.get("category") or "").strip()
+                if category not in CATEGORIES:
+                    category = "Otro"
+                valid_rows.append({
+                    "title": title,
+                    "category": category,
+                    "ingredients": ingredients,
+                    "instructions": instructions,
+                    "prep_time": (row.get("prep_time") or "").strip(),
+                    "cook_time": (row.get("cook_time") or "").strip(),
+                    "image_url": (row.get("image_url") or "").strip(),
+                    "tags": (row.get("tags") or "").strip(),
+                })
+
+            st.sidebar.write(f"✅ {len(valid_rows)} receta(s) lista(s) para importar.")
+            if skipped:
+                st.sidebar.warning(f"⚠️ {skipped} fila(s) omitida(s) por falta de título, ingredientes o instrucciones.")
+
+            with st.sidebar.expander(f"Vista previa ({len(valid_rows)})"):
+                for r in valid_rows:
+                    st.write(f"• {r['title']} ({r['category']})")
+
+            if valid_rows and st.sidebar.button(f"Importar {len(valid_rows)} receta(s)", type="primary"):
+                progress = st.sidebar.progress(0.0)
+                for i, r in enumerate(valid_rows):
+                    add_recipe(
+                        r["title"], r["category"], r["ingredients"], r["instructions"],
+                        r["prep_time"], r["cook_time"], r["image_url"], r["tags"],
+                    )
+                    progress.progress((i + 1) / len(valid_rows))
+                st.session_state.flash_message = f"Se importaron {len(valid_rows)} receta(s) correctamente."
+                st.rerun()
+    except Exception as e:
+        st.sidebar.error(f"No se pudo leer el CSV: {e}")
