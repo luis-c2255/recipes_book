@@ -277,7 +277,7 @@ else:
                         st.caption("⚠️ No se puede cargar la imagen desde la URL proporcionada. Por favor, verifica la URL o intenta con una diferente.")
                     else:
                         try:
-                            st.image(image_bytes, use_container_width=True)
+                            st.image(image_bytes, width="Stretch")
                         except Exception:
                             st.caption("⚠️ El archivo de la URL no es una imagen válida.")
 
